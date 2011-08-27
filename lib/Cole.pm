@@ -104,13 +104,13 @@ Cole - Lightweight DI container
 
     $ioc = Cole->new;
 
-    $ioc->register('class name', class => 'Foo');
-    $ioc->register('string',     'Hello, world!');
-    $ioc->register('instance',   Foo->new);
+    $ioc->register( name => 'class name', class => 'Foo');
+    $ioc->register( name => 'string', 'Hello, world!');
+    $ioc->register( name => 'instance',   Foo->new);
 
-    $ioc->register('dependency', class => 'Bar', deps => 'foo');
+    $ioc->register( name => 'dependency', class => 'Bar', deps => 'foo');
     $ioc->register(
-        'multiple dependencies',
+        name => 'multiple dependencies',
         class => 'Baz',
         deps  => ['foo', 'bar']
     );
@@ -123,21 +123,21 @@ L<Cole> is a lightweight Dependency Injection container.
 
 =head2 C<Values>
 
-    $ioc->register(string   => {value => 'Hello world!'});
-    $ioc->register(instance => {value => Foo->new});
+    $ioc->register( name => my_string, value => 'Hello world!' );
+    $ioc->register( name => foo_instance, value => Foo->new );
 
 =head2 C<Class names>
 
-    $ioc->register(class => {class => 'Foo'});
+    $ioc->register( name => foo, class => 'Foo' );
 
 =head2 C<Dependencies>
 
-    $ioc->register(class => {class => 'Foo', deps => 'bar'});
+    $ioc->register( name => foo, class => 'Foo', deps => 'bar' );
 
 =head2 C<Aliases>
 
-    $ioc->register(bar => {class => 'Bar'});
-    $ioc->register(class => {class => 'Foo', deps => {bar => 'baz'}});
+    $ioc->register( name => bar, class => 'Bar' );
+    $ioc->register( name => foo, class => 'Foo', deps => { bar => 'baz' } );
 
 C<bar> is passed as C<baz> during C<Foo> creation.
 
@@ -149,7 +149,7 @@ C<bar> is passed as C<baz> during C<Foo> creation.
 
 =head2 C<register>
 
-    $ioc->register(name => {class => 'foo'});
+    $ioc->register( name => some_name, class => 'foo' );
 
 Register a new dependency.
 
