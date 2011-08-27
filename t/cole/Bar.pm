@@ -1,6 +1,12 @@
 package Bar;
 
-use base 'Lamework::Base';
+sub new {
+    my $class = shift;
+        
+    my $self = { @_ };
+    bless $self, $class; 
+    return $self;
+}
 
 sub foo { $_[0]->{foo} }
 
