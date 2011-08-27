@@ -19,14 +19,17 @@ sub new {
 
 sub register {
     my $self = shift;
-    my ($key, $args) = @_;
+    my %args = @_;
 
-    Carp::croak('Service name is required') unless $key;
-    Carp::croak('Service args are required and must be a hashref')
-      unless $args && ref $args eq 'HASH';
+    Carp::croak('Service name is required') unless $args{name};
+    if( my $class = $args{class} ){
+        $args{block} = sub { 
+            Class::Load::load_class( $class );
+            $class->new( @_ ) 
+        };
+    }
 
-    $self->{services}->{$key} = {%{$args}};    # Shallow copy
-
+    $self->{services}->{$args{name}} = {%args};    # Shallow copy
     return $self;
 }
 
@@ -34,21 +37,13 @@ sub get {
     my $self = shift;
     my ($key) = @_;
 
-    my $service = $self->_get($key);
+    my $service = $self->_get( $key );
 
-    if (exists $service->{value}) {
-        return $service->{value};
+    if ( !exists $service->{value} ) {
+        my %args = $self->_build_deps( $service );
+        $service->{value} = $service->{block}->( %args );
     }
-    elsif (exists $service->{block}) {
-        my %args = $self->_build_deps($service);
-        return $service->{block}->($self, %args);
-    }
-
-    if ($service->{lifecycle} && $service->{lifecycle} eq 'prototype') {
-        return $self->_build_service($service);
-    }
-
-    return $service->{instance} = $self->_build_service($service);
+    return $service->{value};
 }
 
 sub get_all {
@@ -72,18 +67,6 @@ sub _get {
     return $self->{services}->{$key};
 }
 
-sub _build_service {
-    my $self = shift;
-    my ($service) = @_;
-
-    return $service->{value} if exists $service->{value};
-
-    Class::Load::load_class($service->{class});
-
-    my %args = $self->_build_deps($service);
-
-    return $service->{class}->new(%args);
-}
 
 sub _build_deps {
     my $self = shift;
